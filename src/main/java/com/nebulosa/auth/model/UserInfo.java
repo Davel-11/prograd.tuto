@@ -19,6 +19,8 @@ public class UserInfo implements Serializable {
     private String password;
     private boolean student;
     private boolean tutor;
+    private boolean admin;
+
 
     //need default constructor for JSON Parsing
     public UserInfo(){ }
@@ -28,12 +30,29 @@ public class UserInfo implements Serializable {
         this.setPassword(password);
     }
 
-    public UserInfo(String username, String email, String password, boolean student, boolean tutor) {
+    public UserInfo(String username, String email, String password, boolean student, boolean tutor, boolean admin) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.student = student;
         this.tutor = tutor;
+        this.admin = admin;
+    }
+
+    public boolean isStudent() {
+        return student;
+    }
+
+    public boolean isTutor() {
+        return tutor;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
     //@Column(name = "student", nullable = true)

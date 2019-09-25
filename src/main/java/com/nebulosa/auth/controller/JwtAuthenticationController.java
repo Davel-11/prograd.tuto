@@ -1,5 +1,6 @@
 package com.nebulosa.auth.controller;
 
+import com.nebulosa.auth.dao.UserRepositoryData;
 import com.nebulosa.auth.model.UserInfo;
 import com.nebulosa.auth.model.UserToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +35,22 @@ public class JwtAuthenticationController {
     @Autowired
     private JwtUserDetailsService userDetailsService;
 
+    UserRepositoryData userRepositoryData;
+
+    JwtAuthenticationController(UserRepositoryData userRepositoryData) {
+        this.userRepositoryData = userRepositoryData;
+    }
+
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<UserToken> createAuthenticationToken(@RequestBody UserInfo user) throws Exception {
 
-        authenticate(user.getUsername(), user.getPassword());
+        authenticate(user.getEmail(), user.getPassword());
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         final String token = jwtTokenUtil.generateToken(userDetails);
         JwtResponse tokenData = new JwtResponse(token);
 
-        UserInfo userInfo = new UserInfo( user.getUsername(), "pass",  "email", false, false );
+        UserInfo userInfo = this.userRepositoryData.findByEmail(user.getEmail());
 
         UserToken userToken = new UserToken(userInfo, tokenData);
 
@@ -51,9 +58,9 @@ public class JwtAuthenticationController {
         return new ResponseEntity<>( userToken, HttpStatus.OK );
     }
 
-    private void authenticate(String username, String password) throws Exception {
+    private void authenticate(String email, String password) throws Exception {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         } catch (DisabledException e) {
             throw new Exception("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
